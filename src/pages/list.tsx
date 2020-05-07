@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect} from 'react'
 import { Header } from  '../components/header'
 import { TodoDataLow }  from  '../components/todo-data-low'
+import { db } from "../index"
 
 type TodoDataType = {
     id: number,
@@ -20,33 +21,20 @@ export const List: React.FC<Props> = (history) => {
     const [todoData, setTodoData] = useState<TodoDataType[]>([])
 
     useEffect(() => {
-        const fetchTodoData = () => {
-            const todoData: TodoDataType[] = [
-                {
-                    id: 1,
-                    title: 'タイトル1',
-                    content: '内容1内容1内容1内容1内容1内容1内容1',
-                    createdAt: '2020-05-04',
-                    category: 1,
-                    isFavorite: false,
-                },
-                {
-                    id: 2,
-                    title: 'タイトル2',
-                    content: '内容2内容2内容2内容2内容2内容2内容2内容2内容2内容2内容2内容2内容2',
-                    createdAt: '2020-05-04',
-                    category: 2,
-                    isFavorite: true,
-                },
-                {
-                    id: 3,
-                    title: 'タイトル3',
-                    content: '内容3内容3内容3内容3内容3内容3内容3内容3内容3内容3内容3内容3',
-                    createdAt: '2020-05-04',
-                    category: 1,
-                    isFavorite: false,
-                },
-            ]
+        const fetchTodoData = async () => {
+            let todoData : TodoDataType[] = [];
+            const datas = await db.collection('todo').get().then(d => {
+                d.forEach(doc => {
+                    todoData.push({
+                        id: doc.data().id,
+                        title: doc.data().title,
+                        content: doc.data().content,
+                        createdAt: doc.data().createdAt,
+                        category: doc.data().category,
+                        isFavorite: doc.data().isFavorite
+                    })
+                })
+            })
             setTodoData(todoData)
         }
         setTimeout(() => fetchTodoData(), 300)
