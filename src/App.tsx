@@ -3,19 +3,16 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 
 import './App.css';
 import { List } from './pages/list';
-import Set from './pages/set';
+import { Set } from './pages/set';
+import { edit } from './pages/edit';
 
-class App extends Component {
-  render() {
-    return(
-      <BrowserRouter>
-        <Switch>
-          <Route exact path='/' component={List} />
-          <Route path='/set' component={Set} />
-        </Switch>
-      </BrowserRouter>
-    )
-  }
-}
-
-export default App;
+export const App: React.SFC = () =>
+  (
+    <BrowserRouter>
+      <Switch>
+        <Route exact path='/' component={List} />
+        <Route path='/set' component={Set} />
+        <Route path='/edit' component={edit} />
+      </Switch>
+    </BrowserRouter>
+  )
