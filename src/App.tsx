@@ -4,7 +4,7 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import './App.css';
 import { List } from './pages/list';
 import { Set } from './pages/set';
-import { edit } from './pages/edit';
+import { Edit } from './pages/edit';
 
 export const App: React.SFC = () =>
   (
@@ -12,7 +12,7 @@ export const App: React.SFC = () =>
       <Switch>
         <Route exact path='/' component={List} />
         <Route path='/set' component={Set} />
-        <Route path='/edit' component={edit} />
+        <Route path='/edit' component={Edit} />
       </Switch>
     </BrowserRouter>
   )

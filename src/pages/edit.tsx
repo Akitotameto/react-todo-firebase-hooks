@@ -6,12 +6,11 @@ type Props = {
     history: any
 }
 
-export const Set: React.SFC<Props> = (props) => {
-
+export const Edit: React.FC<Props> = (props) => {
     return(
         <div>
-            <Header history={props.history} index={2} />
-            <h1>登録画面</h1>
+            <Header history={props.history} index={3} />
+            <h1>編集画面</h1>
             <Form />
         </div>
     )

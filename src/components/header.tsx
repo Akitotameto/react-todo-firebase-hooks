@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React from 'react'
+import { useHistory } from 'react-router'
 
 type Props = {
     history: any
@@ -7,12 +8,14 @@ type Props = {
 
 export const Header: React.SFC<Props> = (props) => {
 
+    const history = useHistory();
+
     const pageList = () => {
-        props.history.push('/')
+        history.push('/')
     }
 
     const pageSet = () => {
-        props.history.push('/set')
+        history.push('/set')
     }
 
     return(

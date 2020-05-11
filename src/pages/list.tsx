@@ -1,4 +1,5 @@
-import React, { useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
+import { useHistory } from 'react-router'
 import { Header } from  '../components/header'
 import { TodoDataLow }  from  '../components/todo-data-low'
 import { db } from "../index"
@@ -16,30 +17,39 @@ type Props = {
     history: any
 }
 
-export const List: React.FC<Props> = (history) => {
-
+export const List: React.FC<Props> = () => {
     const [todoData, setTodoData] = useState<TodoDataType[]>([])
+    const [favoriteCount, setFavoriteCount] = useState<number>()
+    const history = useHistory()
 
-    useEffect(() => {
-        const fetchTodoData = async () => {
-            let todoData : TodoDataType[] = [];
-            const datas = await db.collection('todo').get().then(d => {
-                d.forEach(doc => {
-                    todoData.push({
-                        id: doc.data().id,
-                        title: doc.data().title,
-                        content: doc.data().content,
-                        createdAt: doc.data().createdAt,
-                        category: doc.data().category,
-                        isFavorite: doc.data().isFavorite
-                    })
+    const fetchTodoData = async () => {
+        let todoData : TodoDataType[] = []
+        const datas = await db.collection('todo').get().then(d => {
+            d.forEach(doc => {
+                todoData.push({
+                    id: doc.data().id,
+                    title: doc.data().title,
+                    content: doc.data().content,
+                    createdAt: doc.data().createdAt,
+                    category: doc.data().category,
+                    isFavorite: doc.data().isFavorite
                 })
             })
-            setTodoData(todoData)
-        }
-        setTimeout(() => fetchTodoData(), 300)
+        })
+        setTodoData(todoData)
+
+        let favorite = todoData.filter((item) => {
+            return item.isFavorite == true
+        })
+        setFavoriteCount(favorite.length)
+    }
+
+    // FirebaseのDBからデータを取得
+    useEffect(() => {
+        fetchTodoData();
     }, [])
 
+    // お気に入り処理
     const onFavorite = (id: number) => {
         console.log("test", id)
         if (todoData) {
@@ -52,9 +62,20 @@ export const List: React.FC<Props> = (history) => {
                 }
             })
             setTodoData(todoData)
+            const data = db.collection('todo').doc('ak39FLao5oUFDpP37izE').update({
+                id: 1,
+                title: 'aaaa',
+                content: 'bbbb',
+                category: 1,
+                createdAt: '2020-05-11',
+                isFavorite: true
+            }).then(() => {
+                fetchTodoData();
+            })
         }
     };
 
+    // お気に入り解除処理
     const onUnFavorite = (id: number) => {
         console.log("test", id)
         if (todoData) {
@@ -66,9 +87,20 @@ export const List: React.FC<Props> = (history) => {
                 }
             })
             setTodoData(todoData)
+            const data = db.collection('todo').doc('ak39FLao5oUFDpP37izE').update({
+                id: 1,
+                title: 'aaaa',
+                content: 'bbbb',
+                category: 1,
+                createdAt: '2020-05-11',
+                isFavorite: false
+            }).then(() => {
+                fetchTodoData();
+            })
         }
     };
 
+    // 削除処理
     const onDeleteLow = (id: number) => {
             console.log("test", id)
             console.log('id', id)
@@ -78,7 +110,6 @@ export const List: React.FC<Props> = (history) => {
                 todoData.map((v, index) => {
                     if (v.id === id){
                         todoData.splice(index, 1)
-
                         console.log('todoData!', todoData)
                     }
                 })
@@ -86,6 +117,36 @@ export const List: React.FC<Props> = (history) => {
             }
     }
 
+    // 編集画面へ遷移
+    const pageEdit = (id: number) => {
+        let oneDataaa = todoData.filter(item => {
+            return item.id == id
+        })
+        // idを取得
+        history.push({
+            pathname: '/edit',
+            search: `?id=${id}`,
+        })
+
+        // 特定のデータに絞る
+        // let oneData;
+        // if (todoData) {
+        //     console.log('取得したid', id)
+        //     todoData.map((v, index) => {
+        //         if (v.id === id){
+        //             oneData = v;
+        //             console.log('todoDataのID', v.id)
+        //             console.log('todoData!', todoData)
+        //         }
+        //     })
+        //     console.log('oneData', oneData)
+        // }
+
+        // 特定のデータに絞るパターン2
+        console.log('oneDataList', todoData.filter(item => {
+            return item.id == id
+        }))
+    }
 
     return(
         <div>
@@ -93,6 +154,7 @@ export const List: React.FC<Props> = (history) => {
             <div className='contents-1'>
                 <h1>Todo List</h1>
             </div>
+            <span>お気に入り件数 : {favoriteCount} </span>
             <table className='table-1'>
                 <thead>
                     <tr>
@@ -105,142 +167,10 @@ export const List: React.FC<Props> = (history) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {!!todoData ? todoData.map((item:TodoDataType) => <TodoDataLow todoData={item} onFavorite={onFavorite} onUnFavorite={onUnFavorite} onDeleteLow={onDeleteLow} />): '読み込み中...'}
+                    {!!todoData ? todoData.map((item:TodoDataType) => <TodoDataLow todoData={item} onFavorite={onFavorite} onUnFavorite={onUnFavorite} onDeleteLow={onDeleteLow} pageEdit={pageEdit} />) : '読み込み中...'}
                 </tbody>
             </table>
         </div>
     )
 
 }
-
-// class List extends Component<Props, State> {
-//         constructor(props: Props) {
-//         super(props)
-
-//         this.state = {
-//             todoData: null
-//         }
-//     }
-
-
-// fetchTodoData = () => {
-//     const todoData: TodoDataType[] = [
-//         {
-//             id: 1,
-//             title: 'タイトル1',
-//             content: '内容1内容1内容1内容1内容1内容1内容1',
-//             createdAt: '2020-05-04',
-//             category: 1,
-//             isFavorite: false,
-//         },
-//         {
-//             id: 2,
-//             title: 'タイトル2',
-//             content: '内容2内容2内容2内容2内容2内容2内容2内容2内容2内容2内容2内容2内容2',
-//             createdAt: '2020-05-04',
-//             category: 2,
-//             isFavorite: true,
-//         },
-//         {
-//             id: 3,
-//             title: 'タイトル3',
-//             content: '内容3内容3内容3内容3内容3内容3内容3内容3内容3内容3内容3内容3',
-//             createdAt: '2020-05-04',
-//             category: 1,
-//             isFavorite: false,
-//         },
-//     ]
-
-//         setTimeout(() => this.setState({ todoData }), 300)
-//     }
-
-//     componentWillMount() {
-//         console.log('componentWillMount!!!')
-//     }
-
-//     componentDidMount() {
-//         this.fetchTodoData()
-//         console.log('componentDidMount!!!')
-//     }
-
-//     componentWillUnmount() {
-//         console.log('componentWillUnmount!!!')
-//     }
-
-// onFavorite = (id: number) => {
-//     const { todoData } = this.state;
-//     console.log("test", id)
-//     if (todoData) {
-//         todoData.map((v, index) => {
-//             console.log('todo index', index)
-//             console.log('todo value', v)
-//             if (v.id === id){
-//                 console.log('favorite!')
-//                 todoData[index].isFavorite = true
-//                 this.setState({ todoData })
-//                 console.log('todoData', todoData)
-//             }
-//         })
-//     }
-// };
-
-// onUnFavorite = (id: number) => {
-//     const { todoData } = this.state;
-//     console.log("test", id)
-//     if (todoData) {
-//         todoData.map((v, index) => {
-//             console.log('todo index', index)
-//             console.log('todo value', v)
-//             if (v.id === id){
-//                 console.log('favorite!')
-//                 todoData[index].isFavorite = false
-//                 this.setState({ todoData })
-//                 console.log('todoData', todoData)
-//             }
-//         })
-//     }
-// };
-
-// onDeleteLow = (id: number) => {
-//     const { todoData } = this.state;
-//     console.log("test", id)
-//     if (todoData) {
-//         todoData.map((v, index) => {
-//         if (v.id === id){
-//             todoData.splice(index, 1)
-//             this.setState({ todoData })
-//             console.log('todoData', todoData)
-//         }
-//     })
-//     }
-// };
-
-//     render() {
-//         const { history } = this.props;
-//         const { todoData } = this.state;
-
-//         return(
-//             <div>
-//                 <Header history={history} index={1}/>
-//                 <div className='contents-1'>
-//                     <h1>Todo List</h1>
-//                 </div>
-//                 <table className='table-1'>
-//                     <thead>
-//                         <tr>
-//                             <th>ID</th>
-//                             <th>タイトル</th>
-//                             <th>内容</th>
-//                             <th>日時</th>
-//                             <th>カテゴリ</th>
-//                             <th>操作</th>
-//                         </tr>
-//                     </thead>
-//                     <tbody>
-//                         {!!todoData ? <TodoDataLow todoData={todoData} onFavorite={this.onFavorite} onUnFavorite={this.onUnFavorite} onDeleteLow={this.onDeleteLow} /> : "読み込み中..." }
-//                     </tbody>
-//                 </table>
-//             </div>
-//         )
-//     }
-//}}
